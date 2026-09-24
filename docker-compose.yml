@@ -11,5 +11,19 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  backend:
+    build: ./backend
+    container_name: dms_backend
+    ports:
+      - "8081:8081"
+    environment:
+      # Spring Boot überschreibt damit application.yaml
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/document_db
+      - SPRING_DATASOURCE_USERNAME=db_user
+      - SPRING_DATASOURCE_PASSWORD=db_password
+      - SERVER_PORT=8081
+    depends_on:
+      - postgres
+
 volumes:
   postgres_data:
