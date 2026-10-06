@@ -1,15 +1,51 @@
-<div class="dashboard">
-  <h1>Document Management System</h1>
+<div class="container dashboard-container">
+  <div class="header">
+    <h1>Document Management System</h1>
+  </div>
 
-  <p>Welcome to the DMS Dashboard.</p>
+  <div class="panels">
+    <!-- Documents Panel -->
+    <mat-card class="panel">
+      <mat-card-header>
+        <mat-card-title>Recent Documents</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-nav-list>
+          <a mat-list-item *ngFor="let doc of documents" [routerLink]="['/documents', doc.id]">
+            <mat-icon matListItemIcon>description</mat-icon>
+            <div matListItemTitle>{{ doc.title }}</div>
+            <div matListItemLine>{{ doc.createdAt | date:'short' }} <span *ngIf="doc.collectionName">- {{doc.collectionName}}</span></div>
+          </a>
+          <div *ngIf="documents.length === 0" class="empty-state">No documents found.</div>
+        </mat-nav-list>
+      </mat-card-content>
+      <mat-card-actions>
+        <a mat-button color="primary" routerLink="/documents/new">
+          <mat-icon>add</mat-icon> ADD DOCUMENT
+        </a>
+      </mat-card-actions>
+    </mat-card>
 
-  <section>
-    <h2>Documents</h2>
-    <p>Documents will be loaded here.</p>
-  </section>
-
-  <section>
-    <h2>Collections</h2>
-    <p>Collections will be loaded here.</p>
-  </section>
+    <!-- Collections Panel -->
+    <mat-card class="panel">
+      <mat-card-header>
+        <mat-card-title>Collections</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-nav-list>
+          <a mat-list-item *ngFor="let col of collections" [routerLink]="['/collections', col.id]">
+            <mat-icon matListItemIcon>folder</mat-icon>
+            <div matListItemTitle>{{ col.name }}</div>
+            <div matListItemLine>{{ col.documentCount }} document(s)</div>
+          </a>
+          <div *ngIf="collections.length === 0" class="empty-state">No collections found.</div>
+        </mat-nav-list>
+      </mat-card-content>
+      <mat-card-actions>
+        <a mat-button color="primary" routerLink="/collections/new">
+          <mat-icon>add</mat-icon> ADD COLLECTION
+        </a>
+      </mat-card-actions>
+    </mat-card>
+  </div>
 </div>
