@@ -1,0 +1,61 @@
+<div class="detail-container" *ngIf="collection">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{ collection.name }}</mat-card-title>
+      <mat-card-subtitle>
+        Created: {{ collection.createdAt | date:'medium' }}
+        | {{ collection.documentCount }} document(s)
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="meta-data">
+        <p><strong>Description:</strong> {{ collection.description || 'No description provided' }}</p>
+      </div>
+
+      <div class="documents-section">
+        <h3>Documents</h3>
+        
+        <mat-list *ngIf="documents.length > 0">
+          <mat-list-item *ngFor="let doc of documents">
+            <span matListItemTitle><a [routerLink]="['/documents', doc.id]">{{ doc.title }}</a></span>
+            <span matListItemLine>{{ doc.createdAt | date:'short' }}</span>
+            <button matListItemMeta mat-icon-button color="warn" (click)="removeDocument(doc)" title="Remove from collection">
+              <mat-icon>remove_circle</mat-icon>
+            </button>
+          </mat-list-item>
+        </mat-list>
+        
+        <p *ngIf="documents.length === 0">No documents in this collection.</p>
+      </div>
+
+      <div class="assign-section" *ngIf="availableDocuments.length > 0">
+        <mat-form-field appearance="outline">
+          <mat-label>Assign existing document</mat-label>
+          <mat-select [(ngModel)]="selectedDocumentIdToAssign">
+            <mat-option *ngFor="let doc of availableDocuments" [value]="doc.id">
+              {{ doc.title }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button mat-raised-button color="primary" [disabled]="!selectedDocumentIdToAssign" (click)="assignDocument()">
+          Assign
+        </button>
+      </div>
+
+    </mat-card-content>
+
+    <mat-card-actions>
+      <a mat-stroked-button color="primary" [routerLink]="['/collections', collection.id, 'edit']">
+        <mat-icon>edit</mat-icon> Edit
+      </a>
+      <button mat-stroked-button color="warn" (click)="deleteCollection()">
+        <mat-icon>delete</mat-icon> Delete
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+<div *ngIf="error" class="error-message">
+  {{ error }}
+</div>
