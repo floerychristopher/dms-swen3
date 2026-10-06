@@ -2,10 +2,21 @@ spring:
   application:
     name: dms
   datasource:
+    # Lokale Defaults; im Container per SPRING_DATASOURCE_* (docker-compose) überschrieben
     url: jdbc:postgresql://localhost:5432/document_db
     username: db_user
     password: db_password
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    open-in-view: false
+    show-sql: false
+
+server:
+  port: 8081
+  # Hinter nginx: X-Forwarded-* Header auswerten (korrekte Location-Header/Swagger-URLs)
+  forward-headers-strategy: framework
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
