@@ -14,25 +14,44 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Document {
 
+    public static final int TITLE_MAX_LENGTH = 255;
+    public static final int DESCRIPTION_MAX_LENGTH = 2000;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = TITLE_MAX_LENGTH)
     private String title;
 
+    @Column(length = DESCRIPTION_MAX_LENGTH)
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @ManyToOne
+    private LocalDateTime updatedAt;
+
+    // Später: Dateiname, Content-Type, Größe, Storage-Key (MinIO) für den PDF-Upload
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "collection_id")
-    private Collection collection;
+    private DocumentCollection collection;
 
     public Document(String title, String description) {
         this.title = title;
         this.description = description;
-        this.createdAt = LocalDateTime.now();
+    }
+
+    @PrePersist
+    void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }
