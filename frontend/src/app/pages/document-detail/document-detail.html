@@ -1,0 +1,33 @@
+<div class="detail-container" *ngIf="document">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{ document.title }}</mat-card-title>
+      <mat-card-subtitle>
+        Created: {{ document.createdAt | date:'medium' }}
+        <span *ngIf="document.updatedAt"> | Updated: {{ document.updatedAt | date:'medium' }}</span>
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="meta-data">
+        <p><strong>Description:</strong> {{ document.description || 'No description provided' }}</p>
+        <p *ngIf="document.collectionName"><strong>Collection:</strong> 
+          <a [routerLink]="['/collections', document.collectionId]">{{ document.collectionName }}</a>
+        </p>
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <a mat-stroked-button color="primary" [routerLink]="['/documents', document.id, 'edit']">
+        <mat-icon>edit</mat-icon> Edit
+      </a>
+      <button mat-stroked-button color="warn" (click)="deleteDocument()">
+        <mat-icon>delete</mat-icon> Delete
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+<div *ngIf="error" class="error-message">
+  {{ error }}
+</div>
