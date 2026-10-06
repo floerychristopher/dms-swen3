@@ -1,1 +1,40 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+// Apply a prebuilt theme
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; background-color: #f5f5f5; }
+
+/* Modern Web Guidance: Expanding clickable areas and input sizes */
+input, textarea, select {
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+@media (pointer: coarse) {
+  input, textarea, select, button {
+    min-height: 48px;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  clip-path: inset(50%);
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
+}
+
+/* Base layout spacing */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
