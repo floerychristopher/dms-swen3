@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import at.technikum.dms.config.RabbitMQConfig;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.List;
 
@@ -25,6 +27,7 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final CollectionRepository collectionRepository;
     private final DocumentMapper documentMapper;
+    private final RabbitTemplate rabbitTemplate;
 
     public List<DocumentResponse> getAllDocuments() {
         return documentRepository.findAllBy(NEWEST_FIRST).stream()
@@ -41,7 +44,15 @@ public class DocumentService {
         // Später: MultipartFile (PDF) entgegennehmen und im Object-Storage ablegen
         Document document = documentMapper.toEntity(request);
         document.setCollection(resolveCollection(request.collectionId()));
-        return documentMapper.toResponse(documentRepository.save(document));
+
+        Document savedDocument = documentRepository.save(document);
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.DOCUMENT_CREATED_QUEUE,
+                "Document created with ID: " + savedDocument.getId()
+        );
+
+        return documentMapper.toResponse(savedDocument);
     }
 
     @Transactional
