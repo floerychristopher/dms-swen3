@@ -63,6 +63,19 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+  ocr-worker:
+    build: ./ocr-worker
+    container_name: dms_ocr_worker
+    restart: unless-stopped
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=dms_user
+      - SPRING_RABBITMQ_PASSWORD=dms_password
+    depends_on:
+      rabbitmq:
+        condition: service_started
+
 volumes:
   postgres_data:
   rabbitmq_data:
