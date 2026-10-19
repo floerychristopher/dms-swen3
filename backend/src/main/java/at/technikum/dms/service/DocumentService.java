@@ -6,14 +6,14 @@ import at.technikum.dms.entity.Document;
 import at.technikum.dms.entity.DocumentCollection;
 import at.technikum.dms.exception.ResourceNotFoundException;
 import at.technikum.dms.mapper.DocumentMapper;
+import at.technikum.dms.messaging.DocumentCreatedMessage;
 import at.technikum.dms.repository.CollectionRepository;
 import at.technikum.dms.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import at.technikum.dms.config.RabbitMQConfig;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final CollectionRepository collectionRepository;
     private final DocumentMapper documentMapper;
-    private final RabbitTemplate rabbitTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<DocumentResponse> getAllDocuments() {
         return documentRepository.findAllBy(NEWEST_FIRST).stream()
@@ -47,10 +47,8 @@ public class DocumentService {
 
         Document savedDocument = documentRepository.save(document);
 
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.DOCUMENT_CREATED_QUEUE,
-                "Document created with ID: " + savedDocument.getId()
-        );
+        // Wird vom DocumentMessagePublisher erst nach erfolgreichem Commit an RabbitMQ gesendet
+        eventPublisher.publishEvent(new DocumentCreatedMessage(savedDocument.getId(), savedDocument.getTitle()));
 
         return documentMapper.toResponse(savedDocument);
     }

@@ -11,6 +11,12 @@ spring:
       ddl-auto: update
     open-in-view: false
     show-sql: false
+  rabbitmq:
+    # Lokale Defaults (passend zu docker-compose); im Container per SPRING_RABBITMQ_* überschrieben
+    host: localhost
+    port: 5672
+    username: dms_user
+    password: dms_password
 
 server:
   port: 8081
