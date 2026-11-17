@@ -2,7 +2,7 @@
 FROM eclipse-temurin:25-jdk AS builder
 WORKDIR /app
 
-COPY mvnw .
+COPY --chmod=755 mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 
@@ -12,9 +12,13 @@ RUN ./mvnw -B -q dependency:go-offline
 COPY src ./src
 RUN ./mvnw -B package
 
-# ---------- Run-Stage: Nur fertiges JAR mit schlanker JRE ausführen ----------
+# ---------- Run-Stage: Worker mit PDF-Renderer und OCR ----------
 FROM eclipse-temurin:25-jre
 WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends poppler-utils tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng \
+    && rm -rf /var/lib/apt/lists/*
 
 # Nicht als root laufen
 RUN useradd --system --uid 1001 spring

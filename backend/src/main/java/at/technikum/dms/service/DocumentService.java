@@ -9,11 +9,13 @@ import at.technikum.dms.mapper.DocumentMapper;
 import at.technikum.dms.messaging.DocumentCreatedMessage;
 import at.technikum.dms.repository.CollectionRepository;
 import at.technikum.dms.repository.DocumentRepository;
+import at.technikum.dms.repository.DocumentOutboxRepository;
+import at.technikum.dms.storage.DocumentStorage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,7 +29,8 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final CollectionRepository collectionRepository;
     private final DocumentMapper documentMapper;
-    private final ApplicationEventPublisher eventPublisher;
+    private final DocumentOutboxRepository outbox;
+    private final DocumentStorage storage;
 
     public List<DocumentResponse> getAllDocuments() {
         return documentRepository.findAllBy(NEWEST_FIRST).stream()
@@ -41,14 +44,20 @@ public class DocumentService {
 
     @Transactional
     public DocumentResponse createDocument(DocumentRequest request) {
-        // Später: MultipartFile (PDF) entgegennehmen und im Object-Storage ablegen
+        return createDocument(request, null);
+    }
+
+    @Transactional
+    public DocumentResponse createDocument(DocumentRequest request, MultipartFile file) {
         Document document = documentMapper.toEntity(request);
         document.setCollection(resolveCollection(request.collectionId()));
+        if (file != null) {
+            document.setStorageKey(storage.store(file));
+        }
 
         Document savedDocument = documentRepository.save(document);
-
-        // Wird vom DocumentMessagePublisher erst nach erfolgreichem Commit an RabbitMQ gesendet
-        eventPublisher.publishEvent(new DocumentCreatedMessage(savedDocument.getId(), savedDocument.getTitle()));
+        outbox.save(new DocumentCreatedMessage(savedDocument.getId(), savedDocument.getTitle(),
+                savedDocument.getStorageKey()));
 
         return documentMapper.toResponse(savedDocument);
     }
@@ -65,6 +74,9 @@ public class DocumentService {
     public void deleteDocument(Long id) {
         Document document = findDocumentOrThrow(id);
         documentRepository.delete(document);
+        if (document.getStorageKey() != null) {
+            storage.removeAfterCommit(document.getStorageKey());
+        }
     }
 
     Document findDocumentOrThrow(Long id) {

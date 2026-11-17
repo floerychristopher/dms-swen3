@@ -38,6 +38,11 @@ export class DocumentFormComponent implements OnInit {
   isEditMode = false;
   documentId?: number;
   error: string | null = null;
+  pdf?: File;
+
+  selectPdf(event: Event): void {
+    this.pdf = (event.target as HTMLInputElement).files?.[0];
+  }
 
   ngOnInit(): void {
     // mat-error only shows errors once a field was touched (blurred) or the form was submitted
@@ -76,14 +81,16 @@ export class DocumentFormComponent implements OnInit {
     const request: DocumentRequest = this.documentForm.value;
     const req$ = this.isEditMode && this.documentId
       ? this.documentService.update(this.documentId, request)
-      : this.documentService.create(request);
+      : this.pdf
+        ? this.documentService.upload(request, this.pdf)
+        : this.documentService.create(request);
 
     this.error = null;
     req$.subscribe({
       next: (doc) => this.router.navigate(['/documents', doc.id]),
       error: (err) => {
         console.error('Failed to save document', err);
-        this.error = 'Failed to save document.';
+        this.error = err.error?.detail ?? 'Failed to save document.';
         this.cdr.detectChanges();
       }
     });

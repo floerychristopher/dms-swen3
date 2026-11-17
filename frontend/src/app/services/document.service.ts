@@ -22,6 +22,19 @@ export class DocumentService {
     return this.http.post<DocumentResponse>(this.apiUrl, request);
   }
 
+  upload(request: DocumentRequest, pdf: File): Observable<DocumentResponse> {
+    const body = new FormData();
+    body.append('file', pdf);
+    body.append('title', request.title);
+    if (request.description != null) {
+      body.append('description', request.description);
+    }
+    if (request.collectionId != null) {
+      body.append('collectionId', String(request.collectionId));
+    }
+    return this.http.post<DocumentResponse>(this.apiUrl, body);
+  }
+
   update(id: number, request: DocumentRequest): Observable<DocumentResponse> {
     return this.http.put<DocumentResponse>(`${this.apiUrl}/${id}`, request);
   }

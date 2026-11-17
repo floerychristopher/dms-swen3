@@ -32,7 +32,8 @@ public class Document {
 
     private LocalDateTime updatedAt;
 
-    // Später: Dateiname, Content-Type, Größe, Storage-Key (MinIO) für den PDF-Upload
+    @Column(updatable = false)
+    private String storageKey;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "collection_id")

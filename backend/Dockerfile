@@ -3,7 +3,7 @@ FROM eclipse-temurin:25-jdk AS builder
 WORKDIR /app
 
 # Maven Wrapper und Config Dateien kopieren
-COPY mvnw .
+COPY --chmod=755 mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 

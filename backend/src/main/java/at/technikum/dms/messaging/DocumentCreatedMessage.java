@@ -1,9 +1,25 @@
 package at.technikum.dms.messaging;
 
-/**
- * Nachricht an den OCR-Worker, sobald ein Dokument gespeichert wurde (als JSON über RabbitMQ).
- * Dient gleichzeitig als Spring-Event, damit erst nach erfolgreichem Commit gesendet wird.
- * Später: z.B. Storage-Key (MinIO) ergänzen, damit der Worker die PDF laden kann.
- */
-public record DocumentCreatedMessage(Long documentId, String title) {
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "document_outbox")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class DocumentCreatedMessage {
+    @Id
+    private Long documentId;
+    private String title;
+    private String storageKey;
+
+    public DocumentCreatedMessage(Long documentId, String title, String storageKey) {
+        this.documentId = documentId;
+        this.title = title;
+        this.storageKey = storageKey;
+    }
 }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -80,6 +81,26 @@ class DocumentControllerTest {
                 .andExpect(jsonPath("$.title").value("New Doc"));
 
         verify(documentService).createDocument(new DocumentRequest("New Doc", "Desc", null));
+    }
+
+    @Test
+    void uploadDocument_valid_returns201WithLocation() throws Exception {
+        var pdf = new MockMultipartFile("file", "invoice.pdf", "application/pdf", new byte[0]);
+        var request = new DocumentRequest("Invoice", "Desc", 3L);
+        when(documentService.createDocument(request, pdf)).thenReturn(response(2L, "Invoice"));
+
+        mockMvc.perform(multipart("/api/documents").file(pdf)
+                        .param("title", "Invoice").param("description", "Desc").param("collectionId", "3"))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", endsWith("/api/documents/2")))
+                .andExpect(jsonPath("$.id").value(2));
+    }
+
+    @Test
+    void uploadDocument_missingFile_returns400() throws Exception {
+        mockMvc.perform(multipart("/api/documents").param("title", "Invoice"))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(documentService);
     }
 
     @Test

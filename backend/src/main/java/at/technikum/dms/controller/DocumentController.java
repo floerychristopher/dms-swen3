@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -37,14 +39,23 @@ public class DocumentController {
         return documentService.getDocument(id);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create a document")
     @ApiResponse(responseCode = "201", description = "Document created")
     @ApiResponse(responseCode = "400", description = "Validation failed")
     @ApiResponse(responseCode = "404", description = "Referenced collection not found")
     public ResponseEntity<DocumentResponse> createDocument(@Valid @RequestBody DocumentRequest request) {
-        // Später: MultipartFile (PDF) entgegennehmen
-        DocumentResponse created = documentService.createDocument(request);
+        return createdResponse(documentService.createDocument(request));
+    }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload a PDF and queue it for OCR")
+    public ResponseEntity<DocumentResponse> uploadDocument(@Valid @ModelAttribute DocumentRequest request,
+                                                            @RequestParam("file") MultipartFile file) {
+        return createdResponse(documentService.createDocument(request, file));
+    }
+
+    private ResponseEntity<DocumentResponse> createdResponse(DocumentResponse created) {
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(created.id()).toUri();
         return ResponseEntity.created(location).body(created);

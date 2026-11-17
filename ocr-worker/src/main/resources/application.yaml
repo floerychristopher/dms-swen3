@@ -7,3 +7,23 @@ spring:
     port: 5672
     username: dms_user
     password: dms_password
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+    listener:
+      simple:
+        prefetch: 1
+        retry:
+          enabled: true
+          max-retries: 2
+          initial-interval: 2s
+          multiplier: 2
+
+dms:
+  storage:
+    url: http://localhost:9000
+    access-key: dms_minio
+    secret-key: dms_minio_password
+  ocr:
+    languages: deu+eng

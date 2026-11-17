@@ -17,6 +17,11 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>io.minio</groupId>
+			<artifactId>minio</artifactId>
+			<version>8.5.17</version>
+		</dependency>
 		<!-- RabbitMQ (Nachrichten vom REST-Server empfangen) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

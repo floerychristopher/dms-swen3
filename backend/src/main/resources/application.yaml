@@ -12,11 +12,25 @@ spring:
     open-in-view: false
     show-sql: false
   rabbitmq:
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
     # Lokale Defaults (passend zu docker-compose); im Container per SPRING_RABBITMQ_* überschrieben
     host: localhost
     port: 5672
     username: dms_user
     password: dms_password
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 21MB
+
+dms:
+  storage:
+    url: http://localhost:9000
+    access-key: dms_minio
+    secret-key: dms_minio_password
 
 server:
   port: 8081

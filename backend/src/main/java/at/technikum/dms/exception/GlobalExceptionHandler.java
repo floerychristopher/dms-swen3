@@ -1,5 +1,6 @@
 package at.technikum.dms.exception;
 
+import at.technikum.dms.storage.DocumentStorageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -80,6 +81,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 "An unexpected error occurred");
         problem.setTitle("Internal server error");
         return problem;
+    }
+
+    @ExceptionHandler(InvalidPdfException.class)
+    public ProblemDetail handleInvalidPdf(InvalidPdfException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(DocumentStorageException.class)
+    public ProblemDetail handleStorageFailure(DocumentStorageException ex) {
+        log.error("Document storage failed", ex);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE,
+                "Document storage is temporarily unavailable");
     }
 }
 

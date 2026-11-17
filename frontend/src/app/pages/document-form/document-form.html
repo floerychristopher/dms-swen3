@@ -36,6 +36,11 @@
           </mat-select>
         </mat-form-field>
 
+        <label *ngIf="!isEditMode">
+          PDF file (optional)
+          <input type="file" accept="application/pdf,.pdf" (change)="selectPdf($event)">
+        </label>
+
         <p *ngIf="error" class="error-message" role="alert">{{ error }}</p>
 
         <div class="form-actions">
